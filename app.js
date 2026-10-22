@@ -457,6 +457,18 @@ const sampleData = () => ({
 let data = blankData();
 let sampleLoaded = false;
 let activeSectionId = "";
+let hasUnsavedChanges = false;
+
+function markUnsavedChanges() {
+  hasUnsavedChanges = true;
+}
+
+window.addEventListener("beforeunload", (event) => {
+  if (!hasUnsavedChanges) return;
+  event.preventDefault();
+  // Modern browsers show their own standard confirmation message here.
+  event.returnValue = "";
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   bindMeta();
@@ -497,11 +509,13 @@ function bindMeta() {
     if (!el) return;
     el.addEventListener("input", () => {
       data.meta[key] = el.type === "number" ? Number(el.value) : el.value;
+      markUnsavedChanges();
       updateSummary();
     });
   });
   document.getElementById("materials").addEventListener("input", (event) => {
     data.materials = event.target.value;
+    markUnsavedChanges();
     updateSummary();
   });
 }
@@ -511,17 +525,20 @@ function bindActions() {
     const sectionData = { id: uid(), name: "", rows: [blankRow()] };
     data.sections.push(sectionData);
     activeSectionId = sectionData.id;
+    markUnsavedChanges();
     renderSections();
     updateSummary();
   });
   document.getElementById("addSlabBtn").addEventListener("click", () => {
     data.slabs.push({ id: uid(), title: "", description: "", percent: "" });
+    markUnsavedChanges();
     renderSlabs();
     updateSummary();
   });
   document.getElementById("sampleBtn").addEventListener("click", () => {
     sampleLoaded = !sampleLoaded;
     data = sampleLoaded ? sampleData() : blankData();
+    markUnsavedChanges();
     renderAll();
     updateSampleButton();
     setStatus(sampleLoaded ? "Sample quotation loaded" : "Fresh form ready");
@@ -704,6 +721,7 @@ function renderRow(sectionData, rowData) {
         rowData.amount = round(Number(rowData.sqft) * Number(rowData.rate));
         tr.querySelector('[data-field="amount"]').value = rowData.amount;
       }
+      markUnsavedChanges();
       updateSummary();
       updateAreaTotal(tr.closest(".area-card"), sectionData);
     });
@@ -711,6 +729,7 @@ function renderRow(sectionData, rowData) {
   tr.querySelector('[data-action="delete-row"]').addEventListener("click", () => {
     sectionData.rows = sectionData.rows.filter((item) => item.id !== rowData.id);
     if (sectionData.rows.length === 0) sectionData.rows.push(blankRow());
+    markUnsavedChanges();
     renderSections();
     updateSummary();
   });
@@ -720,6 +739,7 @@ function renderRow(sectionData, rowData) {
 function wireSection(card, sectionData) {
   card.querySelector('[data-field="section-name"]').addEventListener("input", (event) => {
     sectionData.name = event.target.value;
+    markUnsavedChanges();
     const tabLabel = document.querySelector(`[data-section-id="${sectionData.id}"] span`);
     const sectionIndex = data.sections.findIndex((item) => item.id === sectionData.id);
     if (tabLabel) tabLabel.textContent = areaDisplayName(sectionData, sectionIndex);
@@ -727,11 +747,13 @@ function wireSection(card, sectionData) {
   });
   card.querySelector('[data-action="add-row"]').addEventListener("click", () => {
     sectionData.rows.push(blankRow());
+    markUnsavedChanges();
     renderSections();
     updateSummary();
   });
   card.querySelector('[data-action="delete-section"]').addEventListener("click", () => {
     data.sections = data.sections.filter((item) => item.id !== sectionData.id);
+    markUnsavedChanges();
     if (activeSectionId === sectionData.id) activeSectionId = "";
     if (data.sections.length === 0) {
       const nextSection = { id: uid(), name: "", rows: [blankRow()] };
@@ -758,11 +780,13 @@ function renderSlabs() {
     rowEl.querySelectorAll("[data-field]").forEach((input) => {
       input.addEventListener("input", () => {
         slab[input.dataset.field] = input.value;
+        markUnsavedChanges();
         updateSummary();
       });
     });
     rowEl.querySelector("button").addEventListener("click", () => {
       data.slabs = data.slabs.filter((item) => item.id !== slab.id);
+      markUnsavedChanges();
       renderSlabs();
       updateSummary();
     });
@@ -1052,6 +1076,7 @@ async function importPdf(event) {
     }
     data = normalizeImported(decodeData(subject.slice(MARKER.length)));
     sampleLoaded = false;
+    markUnsavedChanges();
     renderAll();
     setStatus("PDF loaded and ready to edit");
   } catch (error) {
