@@ -32,10 +32,10 @@
           <p>Sign in to continue to your interior quotation workspace.</p>
         </div>
         <form class="login-form" id="loginForm" novalidate>
-          <label for="loginUsername">User name</label>
+          <label for="loginUsername">Username</label>
           <div class="login-input-wrap">
             <i data-lucide="user-round" aria-hidden="true"></i>
-            <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter your user name" required>
+            <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter your username" required>
           </div>
           <label for="loginPassword">Password</label>
           <div class="login-input-wrap">
@@ -265,7 +265,7 @@
 
         loginForm.addEventListener("submit", (event) => {
           event.preventDefault();
-          if (username.value.trim() === "Pooja2k" && password.value === "Puja@2026") {
+          if (username.value.trim().toLowerCase() === "pooja2k" && password.value === "Puja@2026") {
             error.textContent = "";
             revealWorkspace();
             return;
