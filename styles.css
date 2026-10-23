@@ -27,6 +27,12 @@ body.auth-locked {
   overflow: hidden;
 }
 
+body.auth-locked .topbar,
+body.auth-locked .workspace {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .login-shell {
   position: fixed;
   inset: 0;
@@ -738,18 +744,87 @@ td textarea:focus {
   .login-panel {
     min-height: 100vh;
     width: min(100%, 480px);
-    padding: 34px 26px;
+    padding: 28px 20px 32px;
   }
 
   .login-brand {
-    margin-bottom: 74px;
+    margin-bottom: 54px;
+  }
+
+  .login-copy h2 {
+    font-size: 2rem;
+  }
+
+  .topbar {
+    gap: 14px;
+    padding: 12px 14px;
+  }
+
+  .brand {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .brand img {
+    width: 66px;
+    height: 46px;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+  }
+
+  .tagline {
+    font-size: 0.76rem;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+
+  .topbar .btn,
+  .actions .btn {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 7px;
+    font-size: 0.78rem;
+  }
+
+  .btn span {
+    display: inline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .workspace {
     padding: 12px;
   }
 
-  .tabs,
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 5px;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    justify-content: center;
+    min-width: max-content;
+    min-height: 40px;
+    height: 40px;
+    padding: 8px 12px;
+  }
+
+  .tab small {
+    display: inline;
+  }
+
   .grid.two,
   .area-top,
   .slab-row,
@@ -762,18 +837,22 @@ td textarea:focus {
     padding: 14px;
   }
 
-  .btn span {
-    display: none;
+  .section-head {
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .tab span,
-  .tab small {
-    display: inline;
+  .section-head > .btn {
+    align-self: stretch;
   }
 
-  .brand img {
-    width: 88px;
-    height: 56px;
+  .review-actions .btn {
+    flex: 1 1 100%;
+  }
+
+  .table-wrap {
+    margin-inline: -14px;
+    padding-inline: 14px;
   }
 
   .brand {
