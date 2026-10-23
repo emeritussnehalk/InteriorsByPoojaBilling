@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pooja Interior Ledger</title>
+    <meta name="description" content="Static interior quotation builder with PDF download and PDF re-upload editing.">
+    <link rel="icon" href="assets/pooja-logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body class="auth-locked">
+    <section class="login-shell" id="loginShell" aria-labelledby="loginTitle">
+      <div class="login-art">
+        <img class="login-creative" src="creative.jpg" alt="Interiors by Pooja creative showcase">
+      </div>
+      <div class="login-panel">
+        <div class="login-brand">
+          <img src="assets/pooja-logo.png" alt="Pooja Interior Ledger logo">
+          <div>
+            <span>Interiors by</span>
+            <strong>Pooja</strong>
+          </div>
+        </div>
+        <div class="login-copy">
+          <span class="eyebrow">Welcome back</span>
+          <h2 id="loginTitle">Shape your next space.</h2>
+          <p>Sign in to continue to your interior quotation workspace.</p>
+        </div>
+        <form class="login-form" id="loginForm" novalidate>
+          <label for="loginUsername">User name</label>
+          <div class="login-input-wrap">
+            <i data-lucide="user-round" aria-hidden="true"></i>
+            <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter your user name" required>
+          </div>
+          <label for="loginPassword">Password</label>
+          <div class="login-input-wrap">
+            <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+            <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" title="Show password"><i data-lucide="eye" aria-hidden="true"></i></button>
+          </div>
+          <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
+          <button class="login-submit" type="submit">Enter workspace <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+        </form>
+        <p class="login-footer">Private workspace · Interiors by Pooja</p>
+      </div>
+    </section>
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/pooja-logo.png" alt="Pooja Interior Ledger logo">
+        <div>
+          <h1>Interiors by Pooja</h1>
+          <p class="tagline">Turning spaces into stories you'll love</p>
+        </div>
+      </div>
+      <div class="actions">
+        <label class="btn ghost" for="pdfUpload" title="Upload a PDF made by this app">
+          <i data-lucide="upload"></i>
+          <span>Upload PDF</span>
+        </label>
+        <input id="pdfUpload" type="file" accept="application/pdf" hidden>
+        <button class="btn ghost" id="sampleBtn" type="button" title="Load the sample from the reference quotation">
+          <i data-lucide="file-text"></i>
+          <span>Sample</span>
+        </button>
+        <button class="btn" id="printBtn" type="button" title="Create a PDF and open print">
+          <i data-lucide="printer"></i>
+          <span>Print</span>
+        </button>
+        <button class="btn primary" id="downloadBtn" type="button" title="Download formatted PDF">
+          <i data-lucide="download"></i>
+          <span>Download PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="editor">
+        <nav class="tabs" aria-label="Quotation form sections">
+          <button class="tab active" data-tab-target="detailsPanel" type="button">
+            <span>Details</span>
+            <small id="detailsProgress">0/2</small>
+          </button>
+          <button class="tab" data-tab-target="itemsPanel" type="button">
+            <span>Items</span>
+            <small id="itemsProgress">0/1</small>
+          </button>
+          <button class="tab" data-tab-target="termsPanel" type="button">
+            <span>Payment &amp; Terms</span>
+            <small id="termsProgress">0/2</small>
+          </button>
+          <button class="tab" data-tab-target="reviewPanel" type="button">
+            <span>Review</span>
+            <small id="reviewProgress">0%</small>
+          </button>
+          <button class="tab" data-tab-target="summaryPanel" type="button">
+            <span>Summary</span>
+            <small id="summaryProgress">Rs. 0</small>
+          </button>
+        </nav>
+
+        <section class="form-section tab-panel active" id="detailsPanel">
+          <div class="section-head">
+            <div>
+              <h2>Client and Company Details</h2>
+              <p>Start with the details that appear on the quotation header.</p>
+            </div>
+          </div>
+          <div class="grid two">
+            <label>Client name<input id="clientName" type="text" placeholder="MR SATISH PAWAR"></label>
+            <label>Project address<input id="projectAddress" type="text" placeholder="KESHAV NAGAR"></label>
+            <label>Contact<input id="companyPhone" type="text" placeholder="8483846288"></label>
+            <label>Quote date<input id="quoteDate" type="date"></label>
+            <label class="wide">Office address<input id="officeAddress" type="text" placeholder="Office address"></label>
+            <label>Designer fee %<input id="designerFeePercent" type="number" min="0" step="0.1" value="6"></label>
+          </div>
+        </section>
+
+        <section class="form-section tab-panel" id="itemsPanel">
+          <div class="section-head">
+            <div>
+              <h2>Room Wise Items</h2>
+              <p>Add each area and its furniture or service line items.</p>
+            </div>
+            <button class="btn small" id="addSectionBtn" type="button">
+              <i data-lucide="plus"></i>
+              <span>Add Area</span>
+            </button>
+          </div>
+          <div id="sections"></div>
+        </section>
+
+        <section class="form-section tab-panel" id="termsPanel">
+          <div class="section-head">
+            <div>
+              <h2>Payment &amp; Terms</h2>
+              <p>Keep the commercial terms and material notes clear for the client.</p>
+            </div>
+          </div>
+          <label>Material specifications<textarea id="materials" rows="5"></textarea></label>
+          <div class="section-head minor">
+            <h3>Payment Slabs</h3>
+            <button class="btn small" id="addSlabBtn" type="button">
+              <i data-lucide="plus"></i>
+              <span>Add Slab</span>
+            </button>
+          </div>
+          <div id="slabs" class="slabs"></div>
+        </section>
+
+        <section class="form-section tab-panel" id="reviewPanel">
+          <div class="section-head">
+            <div>
+              <h2>Review and Download</h2>
+              <p>Check the quotation totals, then print or download the PDF.</p>
+            </div>
+          </div>
+          <div class="review-grid">
+            <div class="review-card">
+              <span>Client</span>
+              <strong id="reviewClient">Not added</strong>
+            </div>
+            <div class="review-card">
+              <span>Project</span>
+              <strong id="reviewProject">Not added</strong>
+            </div>
+            <div class="review-card">
+              <span>Areas</span>
+              <strong id="reviewAreas">0</strong>
+            </div>
+            <div class="review-card grand">
+              <span>Grand Total</span>
+              <strong id="reviewGrand">Rs. 0</strong>
+            </div>
+          </div>
+          <div class="review-actions">
+            <button class="btn" type="button" data-tab-jump="detailsPanel">
+              <i data-lucide="user-round"></i>
+              <span>Edit Details</span>
+            </button>
+            <button class="btn" type="button" data-tab-jump="itemsPanel">
+              <i data-lucide="list-plus"></i>
+              <span>Edit Items</span>
+            </button>
+            <button class="btn primary" id="reviewDownloadBtn" type="button">
+              <i data-lucide="download"></i>
+              <span>Download PDF</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="form-section tab-panel" id="summaryPanel">
+          <div class="section-head">
+            <div>
+              <h2>Quote Summary</h2>
+              <p>See completion progress and final commercial values before downloading.</p>
+            </div>
+            <div id="uploadStatus" class="status">Ready</div>
+          </div>
+          <div class="summary-layout">
+            <div class="summary-progress-card">
+              <div class="progress-ring">
+                <div class="progress-track">
+                  <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div class="progress-copy">
+                  <strong id="progressText">0%</strong>
+                  <span>complete</span>
+                </div>
+              </div>
+            </div>
+            <div class="review-card">
+              <span>Items</span>
+              <strong id="itemCount">0</strong>
+            </div>
+            <div class="review-card">
+              <span>Work Total</span>
+              <strong id="workTotal">Rs. 0</strong>
+            </div>
+            <div class="review-card">
+              <span>Designer Fees</span>
+              <strong id="feeTotal">Rs. 0</strong>
+            </div>
+            <div class="review-card grand">
+              <span>Grand Total</span>
+              <strong id="grandTotal">Rs. 0</strong>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const loginForm = document.getElementById("loginForm");
+        const loginShell = document.getElementById("loginShell");
+        const username = document.getElementById("loginUsername");
+        const password = document.getElementById("loginPassword");
+        const error = document.getElementById("loginError");
+        const toggle = document.getElementById("passwordToggle");
+
+        const revealWorkspace = () => {
+          document.body.classList.remove("auth-locked");
+          document.body.classList.add("auth-unlocked");
+          loginShell.setAttribute("aria-hidden", "true");
+          window.setTimeout(() => loginShell.remove(), 520);
+        };
+
+        toggle.addEventListener("click", () => {
+          const isPassword = password.type === "password";
+          password.type = isPassword ? "text" : "password";
+          toggle.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+          toggle.innerHTML = `<i data-lucide="${isPassword ? "eye-off" : "eye"}" aria-hidden="true"></i>`;
+          if (window.lucide) window.lucide.createIcons();
+        });
+
+        loginForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (username.value.trim() === "Pooja2k" && password.value === "Puja@2026") {
+            error.textContent = "";
+            revealWorkspace();
+            return;
+          }
+          error.textContent = "That username or password doesn’t look right.";
+          password.select();
+        });
+      })();
+    </script>
+  </body>
+</html>
